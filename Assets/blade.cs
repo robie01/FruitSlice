@@ -5,6 +5,8 @@ using UnityEngine;
 public class blade : MonoBehaviour {
 
     public GameObject BladeTrailPrefab;
+
+    public float minCuttingVelocity = .001f;
     bool isCutting = false;
 
     GameObject currentBladeTrail;
@@ -12,6 +14,10 @@ public class blade : MonoBehaviour {
     Rigidbody2D rb;
     Camera cam;
     CircleCollider2D circleCollider;
+
+    // this is going to check the velocity of our blade 
+    // to enable activate the circle collider
+    Vector2 previousPosition;
 
 
     public void Start()
@@ -39,14 +45,26 @@ public class blade : MonoBehaviour {
 
     public void updateCut() {
 
-        rb.position = cam.ScreenToWorldPoint(Input.mousePosition);
+        Vector2 newPosition = cam.ScreenToWorldPoint(Input.mousePosition);
+        rb.position = newPosition;
+
+        // Delta time will help not to change our velocity because of frame rate.
+        float velocity = (newPosition - previousPosition).magnitude * Time.deltaTime;
+        if(velocity > minCuttingVelocity) {
+
+            circleCollider.enabled = true;
+        } else {
+            circleCollider.enabled = false;
+        }
+
+        previousPosition = newPosition;
     }
 
     public void startCutting() {
 
         isCutting = true;
         currentBladeTrail = Instantiate(BladeTrailPrefab, transform);
-        circleCollider.enabled = true;
+        circleCollider.enabled = false;
     }
     public void stopCutting() {
 
